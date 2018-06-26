@@ -223,14 +223,34 @@ contract NFToken is
     uint256 _tokenId
   )
     external
-    canTransfer(_tokenId)
-    validNFToken(_tokenId)
   {
-    address tokenOwner = idToOwner[_tokenId];
-    require(tokenOwner == _from);
+    // valid nft check
+    require(_from != address(0));
+    require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
+    
+    // can transfer
+    require(
+      _from == msg.sender
+      || getApproved(_tokenId) == msg.sender
+      || ownerToOperators[_from][msg.sender]
+    );
 
-    _transfer(_to, _tokenId);
+    //clear approval
+    if(idToApprovals[_tokenId] != 0)
+    {
+      delete idToApprovals[_tokenId];
+    }
+    
+    //remove NFToken from current owner
+    assert(ownerToNFTokenCount[_from] > 0);
+    ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
+
+    //add nftoken to new owner
+    idToOwner[_tokenId] = _to;
+    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
+
+    emit Transfer(_from, _to, _tokenId);
   }
 
   /**
@@ -349,10 +369,19 @@ contract NFToken is
     private
   {
     address from = idToOwner[_tokenId];
-    clearApproval(_tokenId);
+    //clear approval
+    if(idToApprovals[_tokenId] != 0)
+    {
+      delete idToApprovals[_tokenId];
+    }
+    
+    //remove NFToken
+    assert(ownerToNFTokenCount[from] > 0);
+    ownerToNFTokenCount[from] = ownerToNFTokenCount[from] - 1;
 
-    removeNFToken(from, _tokenId);
-    addNFToken(_to, _tokenId);
+    //add nftoken
+    idToOwner[_tokenId] = _to;
+    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
     emit Transfer(from, _to, _tokenId);
   }
