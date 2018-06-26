@@ -514,11 +514,23 @@ contract NFToken is
     address _owner,
     uint256 _tokenId
   )
-    validNFToken(_tokenId)
     internal
   {
-    clearApproval(_tokenId);
-    removeNFToken(_owner, _tokenId);
+    // check if valid NFT
+    require(_owner != address(0));
+    require(idToOwner[_tokenId] == _owner);
+
+    // clear approval
+    if(idToApprovals[_tokenId] != 0)
+    {
+      delete idToApprovals[_tokenId];
+    }
+
+    // remove NFT
+    assert(ownerToNFTokenCount[_owner] > 0);
+    ownerToNFTokenCount[_owner] = ownerToNFTokenCount[_owner] - 1;
+    delete idToOwner[_tokenId];
+
     emit Transfer(_owner, address(0), _tokenId);
   }
 
