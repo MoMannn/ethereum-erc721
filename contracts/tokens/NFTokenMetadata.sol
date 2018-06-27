@@ -164,7 +164,7 @@ contract NFTokenMetadata is
   )
     external
   {
-    // valid nftoken check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -176,7 +176,7 @@ contract NFTokenMetadata is
       || ownerToOperators[_from][msg.sender]
     );
 
-    // check if we can send to a contract.
+    // check if we can send to a contract
     if (_to.isContract()) {
       require(
         ERC721TokenReceiver(_to)
@@ -184,17 +184,17 @@ contract NFTokenMetadata is
       );
     }
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken
+    // remove NFT
     assert(ownerToNFTokenCount[_from] > 0);
     ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
 
-    //add nftoken
+    // add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
@@ -216,7 +216,7 @@ contract NFTokenMetadata is
   )
     external
   {
-    // valid nftoken check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -228,7 +228,7 @@ contract NFTokenMetadata is
       || ownerToOperators[_from][msg.sender]
     );
 
-    // check if we can send to a contract.
+    // check if we can send to a contract 
     if (_to.isContract()) {
       require(
         ERC721TokenReceiver(_to)
@@ -236,17 +236,17 @@ contract NFTokenMetadata is
       );
     }
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken
+    // remove NFT
     assert(ownerToNFTokenCount[_from] > 0);
     ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
 
-    //add nftoken
+    //add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
@@ -270,7 +270,7 @@ contract NFTokenMetadata is
   )
     external
   {
-    // valid nft check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -282,17 +282,17 @@ contract NFTokenMetadata is
       || ownerToOperators[_from][msg.sender]
     );
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken from current owner
+    // remove NFT
     assert(ownerToNFTokenCount[_from] > 0);
     ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
 
-    //add nftoken to new owner
+    // add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
@@ -312,7 +312,7 @@ contract NFTokenMetadata is
   )
     external
   {
-    // can operate and at the same time checks validity of NFT.
+    // can operate and at the same time checks validity of NFT
     address tokenOwner = idToOwner[_tokenId];
     require(tokenOwner == msg.sender || ownerToOperators[tokenOwner][msg.sender]);
 
@@ -407,7 +407,7 @@ contract NFTokenMetadata is
     view
     returns (string)
   {
-    // check if valid nft
+    // check if valid NFT
     require(idToOwner[_tokenId] != address(0));
     return idToUri[_tokenId];
   }
@@ -431,11 +431,11 @@ contract NFTokenMetadata is
     require(_tokenId != 0);
     require(idToOwner[_tokenId] == address(0));
 
-    // add nft
+    // add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
-    //add uri
+    // add URI
     idToUri[_tokenId] = _uri;
 
     emit Transfer(address(0), _to, _tokenId);
@@ -470,7 +470,7 @@ contract NFTokenMetadata is
     ownerToNFTokenCount[_owner] = ownerToNFTokenCount[_owner] - 1;
     delete idToOwner[_tokenId];
 
-    // remove uri
+    // remove URI
     if (bytes(idToUri[_tokenId]).length != 0) {
       delete idToUri[_tokenId];
     }

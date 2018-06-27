@@ -164,7 +164,7 @@ contract NFTokenEnumerable is
   )
     external
   {
-    // valid nftoken check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -176,7 +176,7 @@ contract NFTokenEnumerable is
       || ownerToOperators[_from][msg.sender]
     );
 
-    // check if we can send to a contract.
+    // check if we can send to a contract
     if (_to.isContract()) {
       require(
         ERC721TokenReceiver(_to)
@@ -184,13 +184,13 @@ contract NFTokenEnumerable is
       );
     }
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken
+    //remove NFT
     assert(ownerToIds[_from].length > 0);
 
     uint256 tokenToRemoveIndex = idToOwnerIndex[_tokenId];
@@ -204,7 +204,7 @@ contract NFTokenEnumerable is
     idToOwnerIndex[lastToken] = tokenToRemoveIndex;
     idToOwnerIndex[_tokenId] = 0;
 
-    //add nftoken
+    // add NFT
     idToOwner[_tokenId] = _to;
     uint256 length = ownerToIds[_to].push(_tokenId);
     idToOwnerIndex[_tokenId] = length - 1;
@@ -227,7 +227,7 @@ contract NFTokenEnumerable is
   )
     external
   {
-    // valid nftoken check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -239,7 +239,7 @@ contract NFTokenEnumerable is
       || ownerToOperators[_from][msg.sender]
     );
 
-    // check if we can send to a contract.
+    // check if we can send to a contract
     if (_to.isContract()) {
       require(
         ERC721TokenReceiver(_to)
@@ -247,13 +247,13 @@ contract NFTokenEnumerable is
       );
     }
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken
+    // remove NFT
     assert(ownerToIds[_from].length > 0);
 
     uint256 tokenToRemoveIndex = idToOwnerIndex[_tokenId];
@@ -267,7 +267,7 @@ contract NFTokenEnumerable is
     idToOwnerIndex[lastToken] = tokenToRemoveIndex;
     idToOwnerIndex[_tokenId] = 0;
 
-    //add nftoken
+    // add NFT
     idToOwner[_tokenId] = _to;
     uint256 length = ownerToIds[_to].push(_tokenId);
     idToOwnerIndex[_tokenId] = length - 1;
@@ -292,7 +292,7 @@ contract NFTokenEnumerable is
   )
     external
   {
-    // valid nft check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -304,13 +304,13 @@ contract NFTokenEnumerable is
       || ownerToOperators[_from][msg.sender]
     );
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken from current owner
+    // remove NFT
     assert(ownerToIds[_from].length > 0);
 
     uint256 tokenToRemoveIndex = idToOwnerIndex[_tokenId];
@@ -324,7 +324,7 @@ contract NFTokenEnumerable is
     idToOwnerIndex[lastToken] = tokenToRemoveIndex;
     idToOwnerIndex[_tokenId] = 0;
 
-    //add nftoken to new owner
+    // add NFT
     idToOwner[_tokenId] = _to;
     uint256 length = ownerToIds[_to].push(_tokenId);
     idToOwnerIndex[_tokenId] = length - 1;
@@ -345,7 +345,7 @@ contract NFTokenEnumerable is
   )
     external
   {
-    // can operate and at the same time checks validity of NFT.
+    // can operate and at the same time checks validity of NFT
     address tokenOwner = idToOwner[_tokenId];
     require(tokenOwner == msg.sender || ownerToOperators[tokenOwner][msg.sender]);
 
@@ -470,12 +470,12 @@ contract NFTokenEnumerable is
     require(_tokenId != 0);
     require(idToOwner[_tokenId] == address(0));
 
-    // add nft
+    // add NFT
     idToOwner[_tokenId] = _to;
     uint256 length = ownerToIds[_to].push(_tokenId);
     idToOwnerIndex[_tokenId] = length - 1;
 
-    // add nft to tokens array
+    // add NFT to tokens array
     length = tokens.push(_tokenId);
     idToIndex[_tokenId] = length - 1;
 

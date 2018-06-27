@@ -146,7 +146,7 @@ contract NFToken is
   )
     external
   {
-    // valid nftoken check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -158,7 +158,7 @@ contract NFToken is
       || ownerToOperators[_from][msg.sender]
     );
 
-    // check if we can send to a contract.
+    // check if we can send to a contract
     if (_to.isContract()) {
       require(
         ERC721TokenReceiver(_to)
@@ -166,17 +166,17 @@ contract NFToken is
       );
     }
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken
+    // remove NFT
     assert(ownerToNFTokenCount[_from] > 0);
     ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
 
-    //add nftoken
+    // add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
@@ -198,7 +198,7 @@ contract NFToken is
   )
     external
   {
-    // valid nftoken check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -210,7 +210,7 @@ contract NFToken is
       || ownerToOperators[_from][msg.sender]
     );
 
-    // check if we can send to a contract.
+    // check if we can send to a contract
     if (_to.isContract()) {
       require(
         ERC721TokenReceiver(_to)
@@ -218,17 +218,17 @@ contract NFToken is
       );
     }
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken
+    // remove NFT
     assert(ownerToNFTokenCount[_from] > 0);
     ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
 
-    //add nftoken
+    // add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
@@ -252,7 +252,7 @@ contract NFToken is
   )
     external
   {
-    // valid nft check
+    // valid NFT check
     require(_from != address(0));
     require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
@@ -264,17 +264,17 @@ contract NFToken is
       || ownerToOperators[_from][msg.sender]
     );
 
-    //clear approval
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
     
-    //remove NFToken from current owner
+    // remove NFT 
     assert(ownerToNFTokenCount[_from] > 0);
     ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
 
-    //add nftoken to new owner
+    // add NFT 
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
@@ -294,7 +294,7 @@ contract NFToken is
   )
     external
   {
-    // can operate and at the same time checks validity of NFT.
+    // can operate and at the same time checks validity of NFT
     address tokenOwner = idToOwner[_tokenId];
     require(tokenOwner == msg.sender || ownerToOperators[tokenOwner][msg.sender]);
 
@@ -374,7 +374,7 @@ contract NFToken is
     require(_tokenId != 0);
     require(idToOwner[_tokenId] == address(0));
 
-    // add nft
+    // add NFT
     idToOwner[_tokenId] = _to;
     ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
