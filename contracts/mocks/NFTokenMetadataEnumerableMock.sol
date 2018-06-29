@@ -44,7 +44,7 @@ contract NFTokenMetadataEnumerableMock is
     external
   {
     super._mint(_to, _tokenId);
-    super._setTokenUri(_tokenId, _uri);
+   // super._setTokenUri(_tokenId, _uri);
   }
 
   /**

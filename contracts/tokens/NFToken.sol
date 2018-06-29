@@ -86,46 +86,6 @@ contract NFToken is
   );
 
   /**
-   * @dev Guarantees that the msg.sender is an owner or operator of the given NFT.
-   * @param _tokenId ID of the NFT to validate.
-   */
-  modifier canOperate(
-    uint256 _tokenId
-  ) {
-    address tokenOwner = idToOwner[_tokenId];
-    require(tokenOwner == msg.sender || ownerToOperators[tokenOwner][msg.sender]);
-    _;
-  }
-
-  /**
-   * @dev Guarantees that the msg.sender is allowed to transfer NFT.
-   * @param _tokenId ID of the NFT to transfer.
-   */
-  modifier canTransfer(
-    uint256 _tokenId
-  ) {
-    address tokenOwner = idToOwner[_tokenId];
-    require(
-      tokenOwner == msg.sender
-      || getApproved(_tokenId) == msg.sender
-      || ownerToOperators[tokenOwner][msg.sender]
-    );
-
-    _;
-  }
-
-  /**
-   * @dev Guarantees that _tokenId is a valid Token.
-   * @param _tokenId ID of the NFT to validate.
-   */
-  modifier validNFToken(
-    uint256 _tokenId
-  ) {
-    require(idToOwner[_tokenId] != address(0));
-    _;
-  }
-
-  /**
    * @dev Contract constructor.
    */
   constructor()
@@ -186,7 +146,41 @@ contract NFToken is
   )
     external
   {
-    _safeTransferFrom(_from, _to, _tokenId, _data);
+    // valid NFT check
+    require(_from != address(0));
+    require(idToOwner[_tokenId] == _from);
+    require(_to != address(0));
+
+    // can transfer
+    require(
+      _from == msg.sender
+      || idToApprovals[_tokenId] == msg.sender
+      || ownerToOperators[_from][msg.sender]
+    );
+
+    // check if we can send to a contract
+    if (_to.isContract()) {
+      require(
+        ERC721TokenReceiver(_to)
+          .onERC721Received(msg.sender, _from, _tokenId, _data) == MAGIC_ON_ERC721_RECEIVED
+      );
+    }
+
+    // clear approval
+    if(idToApprovals[_tokenId] != 0)
+    {
+      delete idToApprovals[_tokenId];
+    }
+    
+    // remove NFT
+    assert(ownerToNFTokenCount[_from] > 0);
+    ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
+
+    // add NFT
+    idToOwner[_tokenId] = _to;
+    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
+
+    emit Transfer(_from, _to, _tokenId);
   }
 
   /**
@@ -204,7 +198,41 @@ contract NFToken is
   )
     external
   {
-    _safeTransferFrom(_from, _to, _tokenId, "");
+    // valid NFT check
+    require(_from != address(0));
+    require(idToOwner[_tokenId] == _from);
+    require(_to != address(0));
+
+    // can transfer
+    require(
+      _from == msg.sender
+      || idToApprovals[_tokenId] == msg.sender
+      || ownerToOperators[_from][msg.sender]
+    );
+
+    // check if we can send to a contract
+    if (_to.isContract()) {
+      require(
+        ERC721TokenReceiver(_to)
+          .onERC721Received(msg.sender, _from, _tokenId, "") == MAGIC_ON_ERC721_RECEIVED
+      );
+    }
+
+    // clear approval
+    if(idToApprovals[_tokenId] != 0)
+    {
+      delete idToApprovals[_tokenId];
+    }
+    
+    // remove NFT
+    assert(ownerToNFTokenCount[_from] > 0);
+    ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
+
+    // add NFT
+    idToOwner[_tokenId] = _to;
+    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
+
+    emit Transfer(_from, _to, _tokenId);
   }
 
   /**
@@ -223,14 +251,34 @@ contract NFToken is
     uint256 _tokenId
   )
     external
-    canTransfer(_tokenId)
-    validNFToken(_tokenId)
   {
-    address tokenOwner = idToOwner[_tokenId];
-    require(tokenOwner == _from);
+    // valid NFT check
+    require(_from != address(0));
+    require(idToOwner[_tokenId] == _from);
     require(_to != address(0));
+    
+    // can transfer
+    require(
+      _from == msg.sender ||
+      idToApprovals[_tokenId] == msg.sender ||
+      ownerToOperators[_from][msg.sender]
+    );
 
-    _transfer(_to, _tokenId);
+    // clear approval
+    if(idToApprovals[_tokenId] != 0)
+    {
+      delete idToApprovals[_tokenId];
+    }
+    
+    // remove NFT 
+    assert(ownerToNFTokenCount[_from] > 0);
+    ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
+
+    // add NFT 
+    idToOwner[_tokenId] = _to;
+    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
+
+    emit Transfer(_from, _to, _tokenId);
   }
 
   /**
@@ -245,10 +293,11 @@ contract NFToken is
     uint256 _tokenId
   )
     external
-    canOperate(_tokenId)
-    validNFToken(_tokenId)
   {
+    // can operate and at the same time checks validity of NFT
     address tokenOwner = idToOwner[_tokenId];
+    require(tokenOwner == msg.sender || ownerToOperators[tokenOwner][msg.sender]);
+
     require(_approved != tokenOwner);
 
     idToApprovals[_tokenId] = _approved;
@@ -281,11 +330,11 @@ contract NFToken is
   function getApproved(
     uint256 _tokenId
   )
-    public
+    external
     view
-    validNFToken(_tokenId)
     returns (address)
   {
+    require(idToOwner[_tokenId] != address(0));
     return idToApprovals[_tokenId];
   }
 
@@ -308,56 +357,6 @@ contract NFToken is
   }
 
   /**
-   * @dev Actually perform the safeTransferFrom.
-   * @param _from The current owner of the NFT.
-   * @param _to The new owner.
-   * @param _tokenId The NFT to transfer.
-   * @param _data Additional data with no specified format, sent in call to `_to`.
-   */
-  function _safeTransferFrom(
-    address _from,
-    address _to,
-    uint256 _tokenId,
-    bytes _data
-  )
-    internal
-    canTransfer(_tokenId)
-    validNFToken(_tokenId)
-  {
-    address tokenOwner = idToOwner[_tokenId];
-    require(tokenOwner == _from);
-    require(_to != address(0));
-
-    _transfer(_to, _tokenId);
-
-    if (_to.isContract()) {
-      bytes4 retval = ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data);
-      require(retval == MAGIC_ON_ERC721_RECEIVED);
-    }
-  }
-
-  /**
-   * @dev Actually preforms the transfer.
-   * @notice Does NO checks.
-   * @param _to Address of a new owner.
-   * @param _tokenId The NFT that is being transferred.
-   */
-  function _transfer(
-    address _to,
-    uint256 _tokenId
-  )
-    private
-  {
-    address from = idToOwner[_tokenId];
-    clearApproval(_tokenId);
-
-    removeNFToken(from, _tokenId);
-    addNFToken(_to, _tokenId);
-
-    emit Transfer(from, _to, _tokenId);
-  }
-   
-  /**
    * @dev Mints a new NFT.
    * @notice This is a private function which should be called from user-implemented external
    * mint function. Its purpose is to show and properly initialize data structures when using this
@@ -375,7 +374,9 @@ contract NFToken is
     require(_tokenId != 0);
     require(idToOwner[_tokenId] == address(0));
 
-    addNFToken(_to, _tokenId);
+    // add NFT
+    idToOwner[_tokenId] = _to;
+    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
 
     emit Transfer(address(0), _to, _tokenId);
   }
@@ -392,63 +393,23 @@ contract NFToken is
     address _owner,
     uint256 _tokenId
   )
-    validNFToken(_tokenId)
     internal
   {
-    clearApproval(_tokenId);
-    removeNFToken(_owner, _tokenId);
-    emit Transfer(_owner, address(0), _tokenId);
-  }
+    // check if valid NFT
+    require(_owner != address(0));
+    require(idToOwner[_tokenId] == _owner);
 
-  /** 
-   * @dev Clears the current approval of a given NFT ID.
-   * @param _tokenId ID of the NFT to be transferred.
-   */
-  function clearApproval(
-    uint256 _tokenId
-  )
-    private
-  {
+    // clear approval
     if(idToApprovals[_tokenId] != 0)
     {
       delete idToApprovals[_tokenId];
     }
-  }
 
-  /**
-   * @dev Removes a NFT from owner.
-   * @notice Use and override this function with caution. Wrong usage can have serious consequences.
-   * @param _from Address from wich we want to remove the NFT.
-   * @param _tokenId Which NFT we want to remove.
-   */
-  function removeNFToken(
-    address _from,
-    uint256 _tokenId
-  )
-   internal
-  {
-    require(idToOwner[_tokenId] == _from);
-    assert(ownerToNFTokenCount[_from] > 0);
-    ownerToNFTokenCount[_from] = ownerToNFTokenCount[_from] - 1;
+    // remove NFT
+    assert(ownerToNFTokenCount[_owner] > 0);
+    ownerToNFTokenCount[_owner] = ownerToNFTokenCount[_owner] - 1;
     delete idToOwner[_tokenId];
+
+    emit Transfer(_owner, address(0), _tokenId);
   }
-
-  /**
-   * @dev Assignes a new NFT to owner.
-   * @notice Use and override this function with caution. Wrong usage can have serious consequences.
-   * @param _to Address to wich we want to add the NFT.
-   * @param _tokenId Which NFT we want to add.
-   */
-  function addNFToken(
-    address _to,
-    uint256 _tokenId
-  )
-    internal
-  {
-    require(idToOwner[_tokenId] == address(0));
-
-    idToOwner[_tokenId] = _to;
-    ownerToNFTokenCount[_to] = ownerToNFTokenCount[_to].add(1);
-  }
-
 }
