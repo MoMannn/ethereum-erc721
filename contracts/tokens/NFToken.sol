@@ -259,9 +259,9 @@ contract NFToken is
     
     // can transfer
     require(
-      _from == msg.sender
-      || idToApprovals[_tokenId] == msg.sender
-      || ownerToOperators[_from][msg.sender]
+      _from == msg.sender ||
+      idToApprovals[_tokenId] == msg.sender ||
+      ownerToOperators[_from][msg.sender]
     );
 
     // clear approval
